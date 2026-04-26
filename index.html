@@ -659,7 +659,7 @@
   }
 
   /* ─── الإرسال الرئيسي ─── */
-async function sendMessage() {
+  async function sendMessage() {
     const input = document.getElementById("msg-input");
     const text  = input.value.trim();
     const btn   = document.getElementById("send-btn");
@@ -668,6 +668,7 @@ async function sendMessage() {
     const currentFile = attachedFile;
     const currentType = fileType;
 
+    // عرض رسالة المستخدم مع اسم الملف إن وُجد
     const imgPreview = currentType === "image" ? URL.createObjectURL(currentFile) : null;
     const showName   = currentType === "document" ? currentFile.name : null;
     const displayText = text || (currentType === "image" ? "صورة مرفقة 📷" : "");
@@ -678,106 +679,69 @@ async function sendMessage() {
     showTyping();
 
     try {
+      let response;
 
       /* ══════════════════════════════
-         1) صورة — مباشرة لـ Claude API
+         1) صورة جديدة
       ══════════════════════════════ */
       if (currentFile && currentType === "image") {
         const base64 = await toBase64(currentFile);
-
-        const response = await fetch("https://api.anthropic.com/v1/messages", {
+        response = await fetch(N8N_WEBHOOK_URL, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-key": "ضع_مفتاحك_هنا",
-            "anthropic-version": "2023-06-01"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            model: "claude-3-5-sonnet-20241022",
-            max_tokens: 1024,
-            messages: [{
-              role: "user",
-              content: [
-                {
-                  type: "image",
-                  source: {
-                    type: "base64",
-                    media_type: currentFile.type,
-                    data: base64.split(',')[1]
-                  }
-                },
-                {
-                  type: "text",
-                  text: text || "حلل هذه الصورة وصفها بالتفصيل"
-                }
-              ]
-            }]
+            message:  text || "حلل هذه الصورة وصفها بالتفصيل",
+            type:     "image",
+            fileData: base64.split(',')[1],
+            fileType: currentFile.type
           })
         });
 
-        const imageData = await response.json();
-        hideTyping();
-        addMessage("ai", imageData.content[0].text || "لم أتلقَّ رداً.");
-
       /* ══════════════════════════════
-         2) PDF — مباشرة لـ Claude API
+         2) ملف PDF جديد — احفظه في الذاكرة
       ══════════════════════════════ */
       } else if (currentFile && currentType === "document") {
         const base64 = await toBase64(currentFile);
+        const fileData = base64.split(',')[1];
 
-        const response = await fetch("https://api.anthropic.com/v1/messages", {
+        response = await fetch(N8N_WEBHOOK_URL, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-key": "ضع_مفتاحك_هنا",
-            "anthropic-version": "2023-06-01",
-            "anthropic-beta": "pdfs-2024-09-25"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            model: "claude-3-5-sonnet-20241022",
-            max_tokens: 1024,
-            messages: [{
-              role: "user",
-              content: [
-                {
-                  type: "document",
-                  source: {
-                    type: "base64",
-                    media_type: "application/pdf",
-                    data: base64.split(',')[1]
-                  }
-                },
-                {
-                  type: "text",
-                  text: text || "لخص هذا المستند وأعطني أهم النقاط"
-                }
-              ]
-            }]
+            message:  text || "لخص هذا المستند وأعطني أهم النقاط",
+            type:     "document",
+            fileData: fileData,
+            fileType: currentFile.type,
+            fileName: currentFile.name
           })
         });
 
-        const claudeData = await response.json();
-        hideTyping();
-        addMessage("ai", claudeData.content[0].text || "لم أتلقَّ رداً.");
-
       /* ══════════════════════════════
-         3) نص — عبر n8n
+         3) نص عادي — مع ذاكرة الملف إن وُجد
       ══════════════════════════════ */
       } else {
-        const response = await fetch(N8N_WEBHOOK_URL, {
+        // نص عادي — دايماً للـ AI Agent
+        response = await fetch(N8N_WEBHOOK_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: text, type: "text" })
         });
+      }
 
-        const data = await response.json();
-        hideTyping();
-        addMessage("ai", data.reply || "لم أتلقَّ رداً.");
+      const data = await response.json();
+      const reply = data.reply || "لم أتلقَّ رداً.";
+
+      hideTyping();
+      addMessage("ai", reply);
+
+      // احفظ رد الـ AI في التاريخ (للملفات فقط)
+      if (currentType === "document") {
+        conversationHistory.push({ role: "assistant", content: reply });
       }
 
     } catch (err) {
       hideTyping();
-      addMessage("ai", "⚠️ تعذّر الاتصال بالخادم. تأكد من الاتصال بالإنترنت.");
+      addMessage("ai", "⚠️ تعذّر الاتصال بالخادم. تأكد من إعداد n8n.");
       console.error(err);
     }
 
