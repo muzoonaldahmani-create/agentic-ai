@@ -1,0 +1,22 @@
+{
+  "name": "Agentic AI",
+  "short_name": "AgenticAI",
+  "description": "Your Agentic AI Assistant",
+  "start_url": "/agentic-ai/",
+  "display": "standalone",
+  "background_color": "#F5F6FA",
+  "theme_color": "#2563EB",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192x192/2563EB/FFFFFF?text=AI",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512/2563EB/FFFFFF?text=AI",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
