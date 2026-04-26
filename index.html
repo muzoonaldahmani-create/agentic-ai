@@ -393,6 +393,24 @@
   </style>
 </head>
 <body>
+  <script>
+  (function() {
+    const PASSWORD = "iL!!1vxxxQ51?@7$";
+    const auth = localStorage.getItem("agentic-auth");
+    if (auth !== PASSWORD) {
+      const input = prompt("🔐 أدخل كلمة المرور للمتابعة:");
+      if (input === PASSWORD) {
+        localStorage.setItem("agentic-auth", PASSWORD);
+      } else {
+        document.body.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;flex-direction:column;gap:16px;">
+            <h2 style="color:#EF4444">غير مصرح بالدخول</h2>
+            <button onclick="location.reload()" style="padding:10px 24px;background:#2563EB;color:white;border:none;border-radius:8px;cursor:pointer;font-size:16px;">إعادة المحاولة</button>
+          </div>`;
+      }
+    }
+  })();
+</script>
 
   <div class="header">
     <h1 class="header-title">Your <span>Agentic AI</span></h1>
