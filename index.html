@@ -21,12 +21,12 @@
     }
     *{margin:0;padding:0;box-sizing:border-box;}
     body{font-family:'IBM Plex Sans Arabic','IBM Plex Sans',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
-    .header{background:var(--navy);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-    .header-left{display:flex;align-items:center;gap:14px;}
-    .header-divider{width:1px;height:22px;background:rgba(255,255,255,0.15);}
-    .header-title{font-size:15px;font-weight:600;color:#fff;letter-spacing:0.2px;}
-    .header-sub{font-size:11px;color:rgba(255,255,255,0.45);font-weight:400;letter-spacing:0.4px;}
-    .header-status{display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,0.5);}
+    .header{background:var(--navy);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;}
+    .header-left{display:flex;flex-direction:column;align-items:center;gap:3px;}
+    .header-divider{display:none;}
+    .header-title{font-size:18px;font-weight:700;color:#fff;letter-spacing:0.5px;text-align:center;}
+    .header-sub{font-size:11px;color:rgba(255,255,255,0.45);font-weight:400;letter-spacing:1px;text-align:center;}
+    .header-status{display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,0.5);position:absolute;left:24px;}
     .status-dot{width:6px;height:6px;border-radius:50%;background:#34D399;animation:pulse 2.5s infinite;}
     @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
     .nav-tabs{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;padding:0 24px;gap:2px;flex-shrink:0;}
@@ -195,7 +195,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
       </div>
       <h2>مرحباً، كيف أقدر أساعدك؟</h2>
-      <p>اكتب سؤالك الدفاعي، أرسل صورة أو ارفع مستنداً للتحليل</p>
+      <p>اكتب سؤالك، أرسل صورة أو ارفع مستنداً للتحليل</p>
       <div class="welcome-chips">
         <div class="chip" onclick="fillInput('لخّص لي هذا المستند')">📄 تلخيص مستند</div>
         <div class="chip" onclick="fillInput('ما هذه الصورة؟')">🔍 تحليل صورة</div>
@@ -247,17 +247,47 @@ function switchTab(tab){
   document.getElementById('page-'+tab).classList.add('active');
 }
 
+async function translateText(text){
+  if(!text||text.trim()==='')return text;
+  try{
+    const res=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text.slice(0,350))}&langpair=en|ar`);
+    const data=await res.json();
+    if(data.responseStatus===200&&data.responseData?.translatedText)
+      return data.responseData.translatedText;
+  }catch(e){}
+  return text;
+}
+
+async function translateArticles(articles){
+  const result=[];
+  for(let i=0;i<articles.length;i+=4){
+    const chunk=articles.slice(i,i+4);
+    const translated=await Promise.all(chunk.map(async a=>({
+      ...a,
+      title: await translateText(a.title),
+      snippet: a.snippet? await translateText(a.snippet):''
+    })));
+    result.push(...translated);
+  }
+  return result;
+}
+
 async function fetchRSS(source){
+  let items=[];
   try{
     const res=await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(source.url)}&count=10`);
     const data=await res.json();
-    if(data.status==='ok'&&data.items?.length)return data.items.map(item=>({sourceId:source.id,sourceLabel:source.label,sourceTag:source.tag,title:item.title||'',snippet:stripHtml(item.description||item.content||'').slice(0,130),link:item.link||'',date:relTime(item.pubDate)}));
+    if(data.status==='ok'&&data.items?.length)
+      items=data.items.map(item=>({sourceId:source.id,sourceLabel:source.label,sourceTag:source.tag,title:item.title||'',snippet:stripHtml(item.description||item.content||'').slice(0,120),link:item.link||'',date:relTime(item.pubDate)}));
   }catch(e){}
-  try{
-    const r2=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(source.url)}`);
-    const j2=await r2.json();
-    return parseXML(j2.contents,source);
-  }catch(e){return[];}
+  if(!items.length){
+    try{
+      const r2=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(source.url)}`);
+      const j2=await r2.json();
+      items=parseXML(j2.contents,source);
+    }catch(e){return[];}
+  }
+  return await translateArticles(items);
 }
 
 function parseXML(xml,source){
