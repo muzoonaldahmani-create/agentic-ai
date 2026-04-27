@@ -37,10 +37,12 @@
     .tab-badge{background:var(--blue-light);color:var(--blue);font-size:10px;font-weight:600;border-radius:8px;padding:1px 6px;}
     .page{display:none;flex:1;overflow:hidden;flex-direction:column;}
     .page.active{display:flex;}
-    .news-toolbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+    .news-toolbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;flex-direction:column;gap:8px;flex-shrink:0;}
+    .toolbar-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
     .toolbar-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;white-space:nowrap;}
-    .source-filters{display:flex;gap:6px;flex:1;flex-wrap:wrap;}
-    .source-btn{font-size:12px;font-weight:500;padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;transition:all .15s;}
+    .source-filters{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px;}
+    .source-filters::-webkit-scrollbar{display:none;}
+    .source-btn{font-size:12px;font-weight:500;padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0;}
     .source-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-soft);}
     .source-btn.active{border-color:var(--blue);background:var(--blue-soft);color:var(--blue);font-weight:600;}
     .refresh-btn{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--text2);background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:6px 13px;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0;}
@@ -165,7 +167,13 @@
 
 <div class="page active" id="page-news">
   <div class="news-toolbar">
-    <span class="toolbar-label">المصدر</span>
+    <div class="toolbar-top">
+      <span class="toolbar-label">المصدر</span>
+      <button class="refresh-btn" id="refresh-btn" onclick="loadAllNews()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+        تحديث
+      </button>
+    </div>
     <div class="source-filters">
       <div class="source-btn active" onclick="filterSource('all',this)">الكل</div>
       <div class="source-btn" onclick="filterSource('warzone',this)">War Zone</div>
@@ -173,10 +181,6 @@
       <div class="source-btn" onclick="filterSource('breakingdefense',this)">Breaking Defense</div>
       <div class="source-btn" onclick="filterSource('defensenews',this)">Defense News</div>
     </div>
-    <button class="refresh-btn" id="refresh-btn" onclick="loadAllNews()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
-      تحديث
-    </button>
   </div>
   <div class="news-feed" id="news-feed">
     <div class="skeleton-wrap">
@@ -220,7 +224,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         </button>
       </div>
-      <textarea id="msg-input" placeholder="مرحبا الساع، اكتب سؤالك هنا..." rows="1" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
+      <textarea id="msg-input" placeholder="اكتب سؤالك هنا..." rows="1" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
       <button id="send-btn" onclick="sendMessage()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>
@@ -328,7 +332,6 @@ function renderNews(){
     <div class="source-section">
       <div class="source-header">
         <span class="source-name">${g.label}</span>
-        <span class="source-tag-pill">${g.tag}</span>
         <div class="source-sep"></div>
         <span class="source-art-count">${g.items.length} مقالة</span>
       </div>
