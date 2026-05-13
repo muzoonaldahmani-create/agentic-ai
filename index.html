@@ -17,6 +17,7 @@
       --red:#DC2626; --green:#059669;
       --shadow-sm:0 1px 4px rgba(27,42,74,0.06);
       --shadow:0 4px 16px rgba(27,42,74,0.09);
+      --shadow-lg:0 8px 24px rgba(27,42,74,0.12);
       --radius:10px;
     }
     *{margin:0;padding:0;box-sizing:border-box;}
@@ -37,19 +38,63 @@
     .tab-badge{background:var(--blue-light);color:var(--blue);font-size:10px;font-weight:600;border-radius:8px;padding:1px 6px;}
     .page{display:none;flex:1;overflow:hidden;flex-direction:column;}
     .page.active{display:flex;}
-    .news-toolbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;flex-direction:column;gap:8px;flex-shrink:0;}
-    .toolbar-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
-    .toolbar-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;white-space:nowrap;}
-    .source-filters{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px;}
+
+    /* Toolbar */
+    .news-toolbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;flex-direction:column;gap:10px;flex-shrink:0;position:relative;z-index:50;}
+    .toolbar-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+
+    /* Search */
+    .search-wrap{position:relative;display:flex;align-items:center;flex:1;min-width:220px;}
+    .search-icon{position:absolute;right:12px;width:14px;height:14px;color:var(--text3);pointer-events:none;}
+    .search-input{width:100%;height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:0 38px;font-size:13px;color:var(--text);font-family:'IBM Plex Sans Arabic',sans-serif;outline:none;transition:all .15s;}
+    .search-input::placeholder{color:var(--text3);}
+    .search-input:focus{border-color:var(--blue);background:var(--surface);box-shadow:0 0 0 3px rgba(29,78,216,.08);}
+    .search-clear{position:absolute;left:8px;background:none;border:none;color:var(--text3);cursor:pointer;padding:4px;border-radius:4px;display:none;align-items:center;justify-content:center;transition:color .15s;}
+    .search-clear:hover{color:var(--red);}
+    .search-clear svg{width:14px;height:14px;}
+    .search-clear.show{display:flex;}
+
+    /* Source filter (horizontal buttons - original style) */
+    .filter-group-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;white-space:nowrap;flex-shrink:0;}
+    .source-filters{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px;flex:1;}
     .source-filters::-webkit-scrollbar{display:none;}
-    .source-btn{font-size:12px;font-weight:500;padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0;}
+    .source-btn{font-size:12px;font-weight:500;padding:6px 13px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0;}
     .source-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-soft);}
     .source-btn.active{border-color:var(--blue);background:var(--blue-soft);color:var(--blue);font-weight:600;}
-    .refresh-btn{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--text2);background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:6px 13px;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0;}
-    .refresh-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-soft);}
-    .refresh-btn svg{width:13px;height:13px;}
+
+    /* Type Dropdown (formal, centered text) */
+    .dropdown{position:relative;flex-shrink:0;}
+    .dropdown-trigger{display:flex;align-items:center;justify-content:center;gap:10px;height:40px;min-width:215px;padding:0 16px;background:var(--surface);border:1px solid var(--border2);border-radius:8px;color:var(--text);cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;transition:all .18s;white-space:nowrap;box-shadow:var(--shadow-sm);}
+    .dropdown-trigger:hover{border-color:var(--blue);box-shadow:0 2px 8px rgba(29,78,216,0.1);}
+    .dropdown.has-value .dropdown-trigger{border-color:var(--blue);background:var(--blue-soft);color:var(--blue);}
+    .dropdown.open .dropdown-trigger{border-color:var(--blue);box-shadow:0 0 0 3px rgba(29,78,216,.08);}
+    .dd-text{display:flex;align-items:baseline;gap:6px;}
+    .dd-label{color:var(--text3);font-weight:500;font-size:12.5px;}
+    .dropdown.has-value .dd-label{color:var(--blue);opacity:.85;}
+    .dd-value{font-weight:600;}
+    .dd-chevron{width:11px;height:11px;flex-shrink:0;transition:transform .25s ease;color:var(--text3);}
+    .dropdown.has-value .dd-chevron{color:var(--blue);}
+    .dropdown.open .dd-chevron{transform:rotate(180deg);color:var(--blue);}
+
+    .dropdown-menu{position:absolute;top:calc(100% + 6px);right:0;left:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-lg);padding:6px;z-index:100;opacity:0;visibility:hidden;transform:translateY(-6px) scale(.97);transition:opacity .15s,transform .15s,visibility .15s;transform-origin:top center;}
+    .dropdown.open .dropdown-menu{opacity:1;visibility:visible;transform:translateY(0) scale(1);}
+    .dropdown-section-label{padding:7px 10px 8px;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;border-bottom:1px solid var(--border);margin-bottom:5px;text-align:center;}
+    .dropdown-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;font-size:13px;color:var(--text);cursor:pointer;border-radius:7px;transition:background .12s,color .12s;text-align:right;}
+    .dropdown-item:hover{background:var(--surface2);}
+    .dropdown-item.active{background:var(--blue-soft);color:var(--blue);font-weight:600;}
+    .dropdown-item .dd-check{width:14px;height:14px;color:var(--blue);opacity:0;flex-shrink:0;}
+    .dropdown-item.active .dd-check{opacity:1;}
+
+    /* Refresh Button (formal with text) */
+    .refresh-btn{display:flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 18px;font-size:12.5px;font-weight:600;color:#fff;background:var(--navy);border:1px solid var(--navy);border-radius:8px;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;letter-spacing:0.3px;box-shadow:var(--shadow-sm);}
+    .refresh-btn:hover{background:var(--navy2);border-color:var(--navy2);box-shadow:0 4px 12px rgba(27,42,74,0.18);transform:translateY(-1px);}
+    .refresh-btn:active{transform:translateY(0);box-shadow:var(--shadow-sm);}
+    .refresh-btn svg{width:14px;height:14px;color:#fff;}
+    .refresh-btn.loading{background:var(--navy2);pointer-events:none;}
     .refresh-btn.loading svg{animation:spin .9s linear infinite;}
     @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* Feed */
     .news-feed{flex:1;overflow-y:auto;padding:20px 24px;background:var(--bg);}
     .news-feed::-webkit-scrollbar{width:5px;}
     .news-feed::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
@@ -58,6 +103,11 @@
     .skel{background:var(--surface2);border-radius:4px;margin-bottom:8px;animation:shimmer 1.4s ease-in-out infinite;}
     .skel.h8{height:8px;} .skel.h12{height:12px;} .skel.w40{width:40%;} .skel.w70{width:70%;} .skel.w100{width:100%;}
     @keyframes shimmer{0%,100%{opacity:.5;}50%{opacity:1;}}
+
+    .results-meta{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--text3);margin-bottom:14px;flex-wrap:wrap;}
+    .results-meta strong{color:var(--text2);font-weight:600;}
+    .results-tag{background:var(--blue-soft);border:1px solid var(--blue-light);border-radius:5px;padding:2px 8px;font-size:11px;color:var(--blue);font-weight:600;}
+
     .source-section{margin-bottom:28px;}
     .source-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
     .source-name{font-size:12px;font-weight:700;color:var(--navy);letter-spacing:0.5px;text-transform:uppercase;white-space:nowrap;}
@@ -67,17 +117,25 @@
     .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;}
     .news-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-decoration:none;display:flex;flex-direction:column;gap:9px;transition:all .18s;cursor:pointer;}
     .news-card:hover{border-color:var(--blue);box-shadow:var(--shadow);transform:translateY(-1px);}
-    .card-top{display:flex;align-items:center;justify-content:space-between;}
+    .card-top{display:flex;align-items:center;justify-content:space-between;gap:6px;}
+    .card-meta-left{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
     .card-src{font-size:10px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:0.6px;}
     .card-time{font-size:10px;color:var(--text3);}
-    .card-title{font-size:13.5px;font-weight:600;color:var(--text);line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;text-align:right;}
+    .card-type-badge{font-size:9.5px;font-weight:600;border-radius:4px;padding:1px 6px;text-transform:uppercase;letter-spacing:0.5px;}
+    .card-type-badge.uav{background:#D1FAE5;color:#059669;}
+    .card-type-badge.ai{background:#EDE9FE;color:#7C3AED;}
+    .card-title{font-size:13.5px;font-weight:600;color:var(--text);line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
     .news-card:hover .card-title{color:var(--blue);}
-    .card-snippet{font-size:12px;color:var(--text2);line-height:1.65;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-align:right;}
+    .card-snippet{font-size:12px;color:var(--text2);line-height:1.65;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+    .card-en{direction:ltr;text-align:left;unicode-bidi:plaintext;}
+    .card-en mark{background:#FEF08A;color:inherit;padding:0 2px;border-radius:2px;}
     .card-footer{margin-top:auto;padding-top:10px;border-top:1px solid var(--border);}
     .card-read{font-size:11px;font-weight:600;color:var(--blue);display:flex;align-items:center;gap:4px;opacity:0;transition:opacity .15s;}
     .news-card:hover .card-read{opacity:1;}
     .card-read svg{width:11px;height:11px;}
-    .news-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:10px;color:var(--text3);font-size:13px;}
+    .news-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:10px;color:var(--text3);font-size:13px;text-align:center;}
+    .news-empty .empty-query{color:var(--text2);font-weight:600;direction:ltr;display:inline-block;}
+
     #chat{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth;background:var(--bg);direction:ltr;}
     #chat::-webkit-scrollbar{width:5px;}
     #chat::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
@@ -131,6 +189,14 @@
     .md-li{padding:3px 0 3px 8px;}
     .md-hr{border:none;border-top:1px solid var(--border);margin:10px 0;}
     @keyframes fadeUp{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:translateY(0);}}
+
+    /* Mobile */
+    @media (max-width:600px){
+      .search-wrap{flex:1 1 100%;order:-1;}
+      .dropdown-trigger{min-width:0;flex:1;}
+      .refresh-btn span{display:none;}
+      .refresh-btn{padding:0 12px;}
+    }
   </style>
 </head>
 <body>
@@ -166,20 +232,62 @@
 
 <div class="page active" id="page-news">
   <div class="news-toolbar">
-    <div class="toolbar-top">
-      <span class="toolbar-label">المصدر</span>
+    <!-- Top row: Search + Type Dropdown + Refresh -->
+    <div class="toolbar-row">
+      <div class="search-wrap">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="search-input" class="search-input" oninput="onSearch(this.value)" autocomplete="off"/>
+        <button class="search-clear" id="search-clear" onclick="clearSearch()" title="مسح البحث">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l8 8M14 6l-8 8"/></svg>
+        </button>
+      </div>
+
+      <!-- Type Dropdown -->
+      <div class="dropdown" id="type-dropdown">
+        <button class="dropdown-trigger" onclick="toggleDropdown('type-dropdown')">
+          <span class="dd-text">
+            <span class="dd-label"></span>
+            <span class="dd-value" id="type-value">النوع</span>
+          </span>
+          <svg class="dd-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="dropdown-menu" id="type-menu">
+          <div class="dropdown-section-label">تصفية حسب النوع</div>
+          <div class="dropdown-item active" onclick="selectType('all','جميع الأنواع',this)">
+            <span>All</span>
+            <svg class="dd-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="dropdown-item" onclick="selectType('uav','المسيرات',this)">
+            <span> المسيّرات (UAV)</span>
+            <svg class="dd-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="dropdown-item" onclick="selectType('ai','الذكاء الاصطناعي',this)">
+            <span> الذكاء الاصطناعي (AI)</span>
+            <svg class="dd-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Refresh Button (formal with text) -->
       <button class="refresh-btn" id="refresh-btn" onclick="loadAllNews()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+        <span>تحديث</span>
       </button>
     </div>
-    <div class="source-filters">
-      <div class="source-btn active" onclick="filterSource('all',this)">الكل</div>
-      <div class="source-btn" onclick="filterSource('warzone',this)">War Zone</div>
-      <div class="source-btn" onclick="filterSource('defensescoop',this)">Defense Scoop</div>
-      <div class="source-btn" onclick="filterSource('breakingdefense',this)">Breaking Defense</div>
-      <div class="source-btn" onclick="filterSource('defensenews',this)">Defense News</div>
+
+    <!-- Source filters (horizontal buttons - original style) -->
+    <div class="toolbar-row">
+      <span class="filter-group-label">المصدر</span>
+      <div class="source-filters" id="source-filters">
+        <div class="source-btn active" onclick="filterSource('all',this)">الكل</div>
+        <div class="source-btn" onclick="filterSource('warzone',this)">War Zone</div>
+        <div class="source-btn" onclick="filterSource('defensescoop',this)">Defense Scoop</div>
+        <div class="source-btn" onclick="filterSource('breakingdefense',this)">Breaking Defense</div>
+        <div class="source-btn" onclick="filterSource('defensenews',this)">Defense News</div>
+      </div>
     </div>
   </div>
+
   <div class="news-feed" id="news-feed">
     <div class="skeleton-wrap">
       <div class="skeleton-card"><div class="skel h8 w40"></div><div class="skel h12 w100"></div><div class="skel h8 w70"></div></div>
@@ -197,11 +305,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
       </div>
       <h2>مرحباً، كيف أقدر أساعدك؟</h2>
-      <p>اكتب سؤالك، أرسل صورة أو ارفع مستنداً للتحليل</p>
       <div class="welcome-chips">
-        <div class="chip" onclick="fillInput('لخّص لي هذا المستند')">📄 تلخيص مستند</div>
-        <div class="chip" onclick="fillInput('ما هذه الصورة؟')">🔍 تحليل صورة</div>
-        <div class="chip" onclick="fillInput('آخر أخبار المسيّرات')">🚁 أخبار المسيّرات</div>
+        <div class="chip" onclick="fillInput('لخّص لي هذا المستند')">تلخيص مستند</div>
+        <div class="chip" onclick="fillInput('ما هذه الصورة؟')">تحليل صورة</div>
+        <div class="chip" onclick="fillInput('آخر أخبار المسيّرات')">أخبار المسيرات</div>
       </div>
     </div>
   </div>
@@ -240,7 +347,11 @@ const RSS_SOURCES=[
   {id:'breakingdefense',label:'BREAKING DEFENSE',tag:'دفاع شامل',url:'https://breakingdefense.com/feed/'},
   {id:'defensenews',label:'DEFENSE NEWS',tag:'أخبار دفاعية',url:'https://www.defensenews.com/arc/outboundfeeds/rss/'}
 ];
-let allArticles=[],activeFilter='all';
+
+const UAV_REGEX = /\b(drones?|uavs?|uas|ucav|unmanned|quadcopters?|hexacopters?|fpv|loitering munitions?|reapers?|predators?|global hawk|mq-?\d+|rq-?\d+|switchblades?|shaheds?|bayraktars?|lancets?|altius|kamikaze|swarms?|aerial vehicles?|anduril|skydio|aerovironment|general atomics)\b/i;
+const AI_REGEX = /\b(ai|a\.i\.|artificial intelligence|machine learning|\bml\b|autonomous|llms?|neural networks?|gpt|generative ai|generative model|computer vision|deep learning|chatgpt|openai|anthropic|claude|gemini|agentic|chatbots?|algorithms?)\b/i;
+
+let allArticles=[], activeSource='all', activeType='all', searchQuery='';
 
 function switchTab(tab){
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
@@ -249,31 +360,57 @@ function switchTab(tab){
   document.getElementById('page-'+tab).classList.add('active');
 }
 
-async function translateText(text){
-  if(!text||text.trim()==='')return text;
-  try{
-    const res=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text.slice(0,350))}&langpair=en|ar`);
-    const data=await res.json();
-    if(data.responseStatus===200&&data.responseData?.translatedText)
-      return data.responseData.translatedText;
-  }catch(e){}
-  return text;
+/* ===== Source filter (horizontal buttons) ===== */
+function filterSource(id,el){
+  activeSource=id;
+  document.querySelectorAll('#source-filters .source-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderNews();
 }
 
-async function translateArticles(articles){
-  const result=[];
-  for(let i=0;i<articles.length;i+=4){
-    const chunk=articles.slice(i,i+4);
-    const translated=await Promise.all(chunk.map(async a=>({
-      ...a,
-      title: await translateText(a.title),
-      snippet: a.snippet? await translateText(a.snippet):''
-    })));
-    result.push(...translated);
+/* ===== Type Dropdown ===== */
+function toggleDropdown(id){
+  const dd=document.getElementById(id);
+  document.querySelectorAll('.dropdown.open').forEach(d=>{if(d.id!==id) d.classList.remove('open');});
+  dd.classList.toggle('open');
+}
+
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.dropdown')){
+    document.querySelectorAll('.dropdown.open').forEach(d=>d.classList.remove('open'));
   }
-  return result;
+});
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') document.querySelectorAll('.dropdown.open').forEach(d=>d.classList.remove('open'));
+});
+
+function selectType(type,label,el){
+  activeType=type;
+  document.getElementById('type-value').textContent=label;
+  const dd=document.getElementById('type-dropdown');
+  dd.querySelectorAll('.dropdown-item').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  dd.classList.toggle('has-value', type!=='all');
+  dd.classList.remove('open');
+  renderNews();
 }
 
+/* ===== Search ===== */
+function onSearch(value){
+  searchQuery=value.trim();
+  document.getElementById('search-clear').classList.toggle('show', searchQuery.length>0);
+  renderNews();
+}
+
+function clearSearch(){
+  document.getElementById('search-input').value='';
+  searchQuery='';
+  document.getElementById('search-clear').classList.remove('show');
+  renderNews();
+}
+
+/* ===== RSS fetching ===== */
 async function fetchRSS(source){
   let items=[];
   try{
@@ -289,7 +426,10 @@ async function fetchRSS(source){
       items=parseXML(j2.contents,source);
     }catch(e){return[];}
   }
-  return await translateArticles(items);
+  return items.map(a=>{
+    const text=(a.title||'')+' '+(a.snippet||'');
+    return {...a, isUAV: UAV_REGEX.test(text), isAI: AI_REGEX.test(text)};
+  });
 }
 
 function parseXML(xml,source){
@@ -313,20 +453,59 @@ async function loadAllNews(){
   renderNews();
 }
 
-function filterSource(id,el){
-  activeFilter=id;
-  document.querySelectorAll('.source-btn').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
-  renderNews();
+/* ===== Filtering / rendering ===== */
+function escapeHtml(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);}
+
+function highlightMatch(text, query){
+  const safe = escapeHtml(text||'');
+  if(!query) return safe;
+  const q = escapeHtml(query).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  return safe.replace(new RegExp(q,'gi'), m=>`<mark>${m}</mark>`);
+}
+
+function matchesType(a, type){
+  if(type==='all') return true;
+  if(type==='uav') return a.isUAV;
+  if(type==='ai')  return a.isAI;
+  return true;
+}
+
+function matchesSearch(a, q){
+  if(!q) return true;
+  const ql = q.toLowerCase();
+  return ((a.title||'').toLowerCase().includes(ql) || (a.snippet||'').toLowerCase().includes(ql));
 }
 
 function renderNews(){
   const feed=document.getElementById('news-feed');
-  const list=activeFilter==='all'?allArticles:allArticles.filter(a=>a.sourceId===activeFilter);
-  if(!list.length){feed.innerHTML='<div class="news-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="36" height="36"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>لا توجد مقالات متاحة</span></div>';return;}
+  let list = allArticles;
+  if(activeSource!=='all') list = list.filter(a=>a.sourceId===activeSource);
+  if(activeType!=='all')   list = list.filter(a=>matchesType(a, activeType));
+  if(searchQuery)          list = list.filter(a=>matchesSearch(a, searchQuery));
+
+  if(!list.length){
+    let msg='لا توجد مقالات متاحة';
+    if(searchQuery) msg='لم يُعثر على نتائج للبحث: <span class="empty-query">"'+escapeHtml(searchQuery)+'"</span>';
+    else if(activeType==='uav') msg='لا توجد مقالات عن المسيّرات بهذا الفلتر';
+    else if(activeType==='ai')  msg='لا توجد مقالات عن الذكاء الاصطناعي بهذا الفلتر';
+    feed.innerHTML='<div class="news-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="36" height="36"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>'+msg+'</span></div>';
+    return;
+  }
+
+  let metaHTML='';
+  const filtersActive = activeSource!=='all' || activeType!=='all' || searchQuery;
+  if(filtersActive){
+    const tags=[];
+    if(searchQuery) tags.push('<span class="results-tag">🔍 '+escapeHtml(searchQuery)+'</span>');
+    if(activeType==='uav') tags.push('<span class="results-tag"> UAV</span>');
+    if(activeType==='ai')  tags.push('<span class="results-tag"> AI</span>');
+    metaHTML = '<div class="results-meta"><strong>'+list.length+'</strong> نتيجة '+tags.join(' ')+'</div>';
+  }
+
   const groups={};
   list.forEach(a=>{if(!groups[a.sourceId])groups[a.sourceId]={label:a.sourceLabel,tag:a.sourceTag,items:[]};groups[a.sourceId].items.push(a);});
-  feed.innerHTML=Object.values(groups).map(g=>`
+
+  feed.innerHTML = metaHTML + Object.values(groups).map(g=>`
     <div class="source-section">
       <div class="source-header">
         <span class="source-name">${g.label}</span>
@@ -334,17 +513,29 @@ function renderNews(){
         <span class="source-art-count">${g.items.length} مقالة</span>
       </div>
       <div class="cards-grid">
-        ${g.items.map(a=>`
+        ${g.items.map(a=>{
+          const badges=[];
+          if(a.isUAV) badges.push('<span class="card-type-badge uav">UAV</span>');
+          if(a.isAI)  badges.push('<span class="card-type-badge ai">AI</span>');
+          return `
           <a class="news-card" href="${a.link}" target="_blank" rel="noopener">
-            <div class="card-top"><span class="card-src">${g.label}</span><span class="card-time">${a.date}</span></div>
-            <div class="card-title">${a.title}</div>
-            ${a.snippet?`<div class="card-snippet">${a.snippet}…</div>`:''}
+            <div class="card-top">
+              <div class="card-meta-left">
+                <span class="card-src">${g.label}</span>
+                ${badges.join('')}
+              </div>
+              <span class="card-time">${a.date}</span>
+            </div>
+            <div class="card-title card-en" lang="en" dir="ltr">${highlightMatch(a.title, searchQuery)}</div>
+            ${a.snippet?`<div class="card-snippet card-en" lang="en" dir="ltr">${highlightMatch(a.snippet, searchQuery)}…</div>`:''}
             <div class="card-footer"><div class="card-read">قراءة المقال <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div></div>
-          </a>`).join('')}
+          </a>`;
+        }).join('')}
       </div>
     </div>`).join('');
 }
 
+/* ===== Chat ===== */
 let attachedFile=null,fileType=null;
 function fillInput(text){switchTab('chat');document.getElementById('msg-input').value=text;document.getElementById('msg-input').focus();}
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,110)+'px';}
